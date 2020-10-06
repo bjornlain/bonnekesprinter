@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "CY1ZRKuJxp5vmpLu7iNOJOvUgFiYmt8X1mggojlrdELZfgd50NukBnaoREcBv55wsOP2B6W8n1jbFr6QBGcjfA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\bjorn\\Desktop\\new bonnekesprinter\\ESC-POS-.NET-master\\bonnekesprinter\\bonnekesprinter.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\bjorn\\.nuget\\packages\\microsoft.netcore.platforms\\3.0.0\\microsoft.netcore.platforms.3.0.0.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\microsoft.win32.registry\\4.6.0\\microsoft.win32.registry.4.6.0.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\newtonsoft.json\\12.0.1\\newtonsoft.json.12.0.1.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\4.6.0-rc2.19462.14\\runtime.linux-arm.runtime.native.system.io.ports.4.6.0-rc2.19462.14.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\runtime.linux-arm64.runtime.native.system.io.ports\\4.6.0-rc2.19462.14\\runtime.linux-arm64.runtime.native.system.io.ports.4.6.0-rc2.19462.14.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\runtime.linux-x64.runtime.native.system.io.ports\\4.6.0-rc2.19462.14\\runtime.linux-x64.runtime.native.system.io.ports.4.6.0-rc2.19462.14.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\runtime.native.system.io.ports\\4.6.0\\runtime.native.system.io.ports.4.6.0.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\runtime.osx-x64.runtime.native.system.io.ports\\4.6.0-rc2.19462.14\\runtime.osx-x64.runtime.native.system.io.ports.4.6.0-rc2.19462.14.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\sixlabors.imagesharp\\1.0.0\\sixlabors.imagesharp.1.0.0.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\system.io.ports\\4.6.0\\system.io.ports.4.6.0.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\system.security.accesscontrol\\4.6.0\\system.security.accesscontrol.4.6.0.nupkg.sha512",
+    "C:\\Users\\bjorn\\.nuget\\packages\\system.security.principal.windows\\4.6.0\\system.security.principal.windows.4.6.0.nupkg.sha512"
+  ],
+  "logs": []
+}
