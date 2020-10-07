@@ -141,8 +141,10 @@ namespace WPFCore
             {
                 printedCustomerIds.Add(customerArray[i]._id);
                 printer.Write(Printing(epson, customerArray[i]));
+                var totaal = 0.0;
                 for (var j = 0; j < customerArray[i].orders.Length; j++)
                 {
+                    totaal += customerArray[i].orders[j].product.price * customerArray[i].orders[j].amount;
                     var fixedLength = 21;
                     var productName = customerArray[i].orders[j].product.name;
                     if (productName.Length < 21)
@@ -151,9 +153,14 @@ namespace WPFCore
                         {
                             customerArray[i].orders[j].product.name = customerArray[i].orders[j].product.name.Insert(k, " ");
                         }
+                        printer.Write(PrintingOrder(epson, customerArray[i].orders[j]));
                     } else
                     {
                         var indexOfLastSpace = customerArray[i].orders[j].product.name.IndexOf(" ", 14);
+                        if(indexOfLastSpace == -1)
+                        {
+                            indexOfLastSpace = customerArray[i].orders[j].product.name.IndexOf(" ", 10);
+                        }
                         var firstLine = customerArray[i].orders[j].product.name.Substring(0,indexOfLastSpace);
                         
 
@@ -161,15 +168,20 @@ namespace WPFCore
                             {
                             firstLine = firstLine.Insert(l, " ");
                             }
-                          //first normaal gezien oke
-                        var secondLine = customerArray[i].orders[j].product.name.Substring(indexOfLastSpace + 1);
-                        var lol = 0;
+                        var secondLine = "    " + customerArray[i].orders[j].product.name.Substring(indexOfLastSpace + 1);
+                        //first normaal gezien oke
+                        for (var n = secondLine.Length; n < fixedLength; n++)
+                        {
+                            secondLine = secondLine.Insert(n, " ");
+                        }
+                        printer.Write(PrintingOrderMultipleLines(epson, customerArray[i].orders[j],firstLine,secondLine));
+
                     }
-                    
-                    printer.Write(PrintingOrder(epson, customerArray[i].orders[j]));
+                   
                     for(var y = 0; y < customerArray[i].orders[j].chosenExtra.Length; y++)
                     {
-                        if(customerArray[i].orders[j].chosenExtra[y].price > 0)
+                        totaal += customerArray[i].orders[j].amount * customerArray[i].orders[j].chosenExtra[y].option.price;
+                        if (customerArray[i].orders[j].chosenExtra[y].price > 0)
                         {
                             printer.Write(PrintingExtra(epson, customerArray[i].orders[j].chosenExtra[y]));
                         } else
@@ -180,7 +192,7 @@ namespace WPFCore
                     }
                
                 }
-                printer.Write(PrintingCut(epson));
+                printer.Write(PrintingCut(epson, totaal));
             }
 
            
@@ -226,11 +238,12 @@ namespace WPFCore
                    e.Print(customer.restaurantid.name + "\n"),
                    e.SetStyles(PrintStyle.FontB),
                    e.Print(customer.restaurantid.street + " " + customer.restaurantid.streetnumber + "\n"),
-                   e.Print(customer.restaurantid.city + "  " + customer.restaurantid.website + "\n"),
+                   e.Print(customer.restaurantid.postalcode + "  " + customer.restaurantid.city + "\n"),
+                   e.PrintLine(customer.restaurantid.website),
                    e.PrintLine(" "),
                    //TODO: sanitize test.
                    e.SetStyles(PrintStyle.None),
-                   e.Print("Tafelnummer " + customer.table.tablenumber + " | datum:" + customer.time.Date.ToShortDateString() + " | uur: " + customer.time.Hour + ":" + customer.time.Minute),
+                   e.Print("Tafelnummer " + customer.table.tablenumber + " - datum:" + customer.time.Date.ToShortDateString() + " - uur: " + customer.time.Hour + ":" + customer.time.Minute),
                    e.PrintLine(" ")
                    );
 
@@ -248,7 +261,8 @@ namespace WPFCore
                   e.LeftAlign(),
                   e.PrintLine(""),
                   e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth),
-                  e.PrintLine(order.amount + "X" + "  " + order.product.name + " " + (char)164 + " " + order.product.price + "\n")
+                  e.PrintLine(order.amount + "X" + "  " + firstLine +  " " + (char)164 + " " + (order.product.price*order.amount)),
+                  e.PrintLine(secondLine)
 
                );
 
@@ -261,17 +275,21 @@ namespace WPFCore
             ByteSplicer.Combine(
                   e.LeftAlign(),
                   e.SetStyles(PrintStyle.None),
-                  e.Print( "   " + chosenExtra.name + " : " + chosenExtra.option.name + " " + (char)164 + " " +  chosenExtra.option.price + "\n" )
+                  e.Print( "      " + chosenExtra.name + " : " + chosenExtra.option.name + " " + (char)164 + " " +  chosenExtra.option.price + "\n" )
                );
 
         public static byte[] PrintingExtraWithoutPrice(ICommandEmitter e, ChosenExtra chosenExtra) =>
            ByteSplicer.Combine(
                  e.LeftAlign(),
                  e.SetStyles(PrintStyle.None),
-                 e.Print("   " + chosenExtra.name + " : " + chosenExtra.option.name + "\n")
+                 e.Print("      " + chosenExtra.name + " : " + chosenExtra.option.name + "\n")
               );
-        public static byte[] PrintingCut(ICommandEmitter e) =>
+        public static byte[] PrintingCut(ICommandEmitter e, double totaal) =>
             ByteSplicer.Combine(
+                      e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth),
+                  e.PrintLine("--------------------------------"),
+                  e.RightAlign(),
+                  e.PrintLine("Totaal bedrag : " + (char)164 + " " + totaal),
                   e.CenterAlign(),
                   e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight),
                   e.FeedLines(3),

@@ -13,6 +13,6 @@ namespace WPFCore.Models
 
         public ChosenExtra[] chosenExtra { get; set; }
 
-        public Restaurant restaurantid { get; set; }
+        public string restaurantid { get; set; }
     }
 }

@@ -77,7 +77,7 @@ namespace WPFCore {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/bonnekesprinter;V1.0.0.0;component/ipwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/bonnekesprinter;component/ipwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\IpWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
