@@ -21,5 +21,7 @@ namespace WPFCore.Models
         public string information { get; set; }
         public bool printOut { get; set; }
         public string printerUrl { get; set; }
+
+        public bool metBonnen { get; set; }
     }
 }
