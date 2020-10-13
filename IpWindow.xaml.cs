@@ -6,12 +6,9 @@ using ESCPOS_NET.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Timers;
 using System.Windows;
@@ -38,6 +35,7 @@ namespace WPFCore
         public IpWindow(AuthResponse authResponse)
         {
             printedCustomerIds = new List<string>();
+            printedServiceIds = new List<string>();
             _authResponse = authResponse;
             getPrinterUrl();
             InitializeComponent();
@@ -178,12 +176,26 @@ namespace WPFCore
           
             for(var l = 0; l < serviceArray.Count; l++)
             {
+                var values = new Dictionary<string, string>
+                {
+                    { "_id", serviceArray[l]._id }
+                };
+                var content = new FormUrlEncodedContent(values);
+                 
+                var deleteServiceResponse = client.PostAsync("http://localhost:4100/api/v1/servicecalls.delete", content);
                 printedServiceIds.Add(serviceArray[l]._id);
-
-
+                printer.Write(PrintingService(epson, serviceArray[l]));
+                printer.Write(PrintingCutService(epson, serviceArray[l].restaurantid.name));
             }
             for (var i = 0; i < customerArray.Count; i++)
             {
+                var values = new Dictionary<string, string>
+                {
+                    { "_id", customerArray[i]._id }
+                };
+                var content = new FormUrlEncodedContent(values);
+
+                var deleteServiceResponse = client.PostAsync("http://localhost:4100/api/v1/customers.updateDelivered", content);
                 printedCustomerIds.Add(customerArray[i]._id);
 
 
@@ -355,6 +367,27 @@ namespace WPFCore
                    e.Print("Tafelnummer " + customer.table.tablenumber + " - datum:" + customer.time.Date.ToShortDateString() + " - uur: " + customer.time.Hour + ":" + customer.time.Minute),
                    e.PrintLine(" ")
                    );
+        public static byte[] PrintingService(ICommandEmitter e, Servicecall service) =>
+
+             ByteSplicer.Combine(
+
+                 e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth | PrintStyle.Bold | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth),
+                 e.CenterAlign(),
+                 e.PrintLine(service.restaurantid.name),
+                 e.SetStyles(PrintStyle.FontB),
+                 e.PrintLine(service.restaurantid.street + " " + service.restaurantid.streetnumber),
+                 e.PrintLine(service.restaurantid.postalcode + "  " + service.restaurantid.city),
+                 e.PrintLine(service.restaurantid.website),
+                 e.PrintLine(" "),
+                 //TODO: sanitize test.
+                 e.SetStyles(PrintStyle.None),
+                 e.PrintLine(" "),
+                 e.PrintLine(""),
+                 e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth),
+                 e.PrintLine(  "Tafelnummer : " + service.tablenumber),
+                 e.PrintLine(""),
+                 e.PrintLine(service.description)
+                 );
 
         public static byte[] PrintingOrder(ICommandEmitter e, Order order) =>
              ByteSplicer.Combine(
@@ -405,7 +438,18 @@ namespace WPFCore
                   e.FeedLines(3),
                   e.FullCut()
                );
-
+        public static byte[] PrintingCutService(ICommandEmitter e, string restaurantName) =>
+          ByteSplicer.Combine(
+                e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight | PrintStyle.DoubleWidth),
+                e.PrintLine("--------------------------------"),
+                e.SetStyles(PrintStyle.FontB | PrintStyle.DoubleHeight),
+                e.CenterAlign(),
+                e.PrintImage(File.ReadAllBytes("../../../Images/" + restaurantName + ".PNG"), true, false, 301),
+                e.FeedLines(3),
+                e.PrintLine("DIT IS GEEN GELDIG BTW-KASTICKET"),
+                e.FeedLines(3),
+                e.FullCut()
+             );
         public static byte[] PrintingOrderWithBonnen(ICommandEmitter e, Order order) =>
       ByteSplicer.Combine(
             e.LeftAlign(),

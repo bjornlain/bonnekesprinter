@@ -16,6 +16,6 @@ namespace bonnekesprinter.Models
 
         public string tableid { get; set; }
         public string name { get; set; }
-        public string restaurantid { get; set; }
+        public Restaurant restaurantid { get; set; }
     }
 }
