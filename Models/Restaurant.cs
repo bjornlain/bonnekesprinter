@@ -20,8 +20,11 @@ namespace WPFCore.Models
         public string website { get; set; }
         public string information { get; set; }
         public bool printOut { get; set; }
+
+        public bool printUsb { get; set; }
         public string printerUrl { get; set; }
 
         public bool metBonnen { get; set; }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using ESCPOS_NET;
+﻿using bonnekesprinter.Models;
+using ESCPOS_NET;
 
 using ESCPOS_NET.Emitters;
 using ESCPOS_NET.Utilities;
@@ -31,6 +32,7 @@ namespace WPFCore
         private static readonly HttpClient client = new HttpClient();
         private static System.Timers.Timer aTimer;
         private static List<string> printedCustomerIds ;
+        private static List<string> printedServiceIds;
         private static Restaurant thisRestaurant;
         public static bool metBonnen;
         public IpWindow(AuthResponse authResponse)
@@ -66,14 +68,28 @@ namespace WPFCore
             thisRestaurant = restaurantResponse;
             metBonnen = restaurantResponse.metBonnen;
             thisRestaurant._id = _authResponse.restaurantid;
-            ipAdresBlock.Text = "Het ip-adres van uw printer is :" + restaurantResponse.printerUrl;
+            if (thisRestaurant.printUsb)
+            {
+                ipAdresBlock.Text = "U heeft in de admin module gekozen voor usb printing";
+            } else
+            {
+                ipAdresBlock.Text = "Het ip-adres van uw printer is :" + restaurantResponse.printerUrl;
+            }
+           
             ipAdresBox.Text = restaurantResponse.printerUrl;
 
             
         }
         private void StartPrinter(object sender, RoutedEventArgs e)
         {
-            printer = new NetworkPrinter(ipAddress: ipAdresBox.Text, port: 9100, reconnectOnTimeout: true);
+            if (thisRestaurant.printUsb)
+            {
+                printer = new SerialPrinter(portName: "COM1", baudRate: 115200);
+            } else
+            {
+                printer = new NetworkPrinter(ipAddress: ipAdresBox.Text, port: 9100, reconnectOnTimeout: true);
+            }
+            
             SetTimer();
             printerStatus.Text = "Online";
             var converter = new System.Windows.Media.BrushConverter();
@@ -126,9 +142,27 @@ namespace WPFCore
                 NullValueHandling = NullValueHandling.Ignore
             });
             List<Customer> customerArray = new List<Customer>();
-          
+            List<Servicecall> serviceArray = new List<Servicecall>();
 
 
+            HttpRequestMessage httpRequest2 = new HttpRequestMessage(HttpMethod.Get, "http://localhost:4100/api/v1/servicecalls.getAllServiceCalls");
+            
+            var response2 = await client.SendAsync(httpRequest2);
+
+            var responseString2 = await response2.Content.ReadAsStringAsync();
+            var authResponse2 = JsonConvert.DeserializeObject<Servicecall[]>(responseString2, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+       
+            for(var i = 0; i < authResponse2.Length; i++)
+            {
+                if (!printedServiceIds.Contains(authResponse2[i]._id))
+                {
+                    serviceArray.Add(authResponse2[i]);
+                }
+            }
             for (var i = 0; i < authResponse.Length; i++)
             {
 
@@ -142,15 +176,16 @@ namespace WPFCore
                 }
              }
           
+            for(var l = 0; l < serviceArray.Count; l++)
+            {
+                printedServiceIds.Add(serviceArray[l]._id);
+
+
+            }
             for (var i = 0; i < customerArray.Count; i++)
             {
                 printedCustomerIds.Add(customerArray[i]._id);
 
-
-           
-                int[] data = new int[2] ;
-                data[0] = 48;                          // LSB
-                data[1] = 48 ;                    // MSB
 
                 printer.Write(Printing(epson, customerArray[i]));
                 var totaal = 0.0;
